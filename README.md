@@ -29,9 +29,10 @@ Traditional DR screening relies on ophthalmologist-based funduscopy and grading,
 ## 1.2 The Technical Gap: Resource Constraints in Rural Healthcare
 
 State-of-the-art deep learning models for DR classification (e.g., ResNet152, InceptionV3) consistently achieve high accuracy (90%+) but require significant computational resources:
-ResNet-101: 7.8 GFLOPs, ~600 ms inference on CPU
-ConvNeXt-Small: 8.7 GFLOPs, ~670 ms inference on CPU
-EfficientNet-B5: 9.9 GFLOPs, ~760 ms inference on CPU
+
+- ResNet-101: 7.8 GFLOPs, ~600 ms inference on CPU  
+- ConvNeXt-Small: 8.7 GFLOPs, ~670 ms inference on CPU  
+- EfficientNet-B5: 9.9 GFLOPs, ~760 ms inference on CPU  
 
 In contrast, rural clinics operate on legacy CPUs or handheld devices with limited memory and power, creating a deployment barrier. This motivated our investigation into model compression and efficient architectures.
 
