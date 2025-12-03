@@ -387,7 +387,9 @@ The confusion matrix highlights:
 - Strong diagonal: high correct classifications  
 - Mild ↔ Moderate confusion due to subtle lesion differences  
 - Moderate ↔ Severe misclassifications expected for adjacent DR grades  
-- Overall correct predictions: **625 / 733** (85%)  
+- Overall correct predictions: **625 / 733** (85%)
+
+![Model Architecture](assets/images/dr_architecture.png)
 
 ---
 
