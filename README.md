@@ -506,18 +506,6 @@ GradCAM maps aligned accurately with clinical expectations.
 
 ---
 
-## 8.2 CBAM Attention Maps
-
-CBAM’s channel and spatial attention offered:
-
-- Discriminative channel selection  
-- Spatial localization of DR lesions  
-- Clinically interpretable focus maps  
-
-This supports clinician trust in AI predictions.
-
----
-
 # 9. Comparison with State-of-the-Art
 
 | Model | Accuracy | F1-Score | CPU Inference | Deployment |
