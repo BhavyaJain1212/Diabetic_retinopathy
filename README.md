@@ -257,15 +257,23 @@ Where:
 
 CBAM refines feature maps using sequential:
 
-- **Channel Attention**  
-- **Spatial Attention**
+**Channel Attention:**
 
-Equations:
+$$
+M_c = \sigma(\text{MLP}(\text{AvgPool}(F)) + \text{MLP}(\text{MaxPool}(F)))
+$$
 
-Channel Attention: M_c = σ(MLP(AvgPool(F)) + MLP(MaxPool(F)))
-Spatial Attention: M_s = σ(f7×7([AvgPool(F_c); MaxPool(F_c)]))
-Final Output: F' = M_s ⊗ M_c ⊗ F
+**Spatial Attention:**
 
+$$
+M_s = \sigma(f_{7\times7}([\text{AvgPool}(F_c); \text{MaxPool}(F_c)]))
+$$
+
+**Final Output:**
+
+$$
+F' = M_s \otimes M_c \otimes F
+$$
 
 Advantages for DR detection:
 
