@@ -236,12 +236,15 @@ EfficientNet models adapt well due to **compound scaling**.
 
 **Loss Function:**
 
-L_total = α * KL(T_s || S_s) + (1 - α) * CE(S, y)
+$$
+L_{\text{total}} = \alpha \cdot KL(T_s \,||\, S_s) + (1 - \alpha) \cdot CE(S, y)
+$$
 
 **Distillation Loss:**
 
-KL(softmax(T/τ), softmax(S/τ))
-
+$$
+KL(\text{softmax}(T / \tau), \, \text{softmax}(S / \tau))
+$$
 
 Where:
 
