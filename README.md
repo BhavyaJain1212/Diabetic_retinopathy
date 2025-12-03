@@ -287,7 +287,9 @@ Advantages for DR detection:
 - Highlights lesion-rich areas  
 - Emphasizes discriminative channels  
 - Provides interpretable attention maps  
-- Lightweight overhead  
+- Lightweight overhead
+
+![CBAM](assets/images/CBAM.png)
 
 ---
 
