@@ -134,8 +134,11 @@ where:
 This approach ensures the model observes minority classes as frequently as majority classes during training, preventing bias toward the No DR class.
 
 **Effective Number of Samples:**  
-To prevent overfitting on minority classes as dataset volume grows, we adopted the Effective Number of Samples principle: E(n_i) = (1 - β^(n_i)) / (1 - β)
+To prevent overfitting on minority classes as dataset volume grows, we adopted the Effective Number of Samples principle:
 
+$$
+E(n_i) = \frac{1 - \beta^{\,n_i}}{1 - \beta}
+$$
 
 where:  
 - β is a hyperparameter  
