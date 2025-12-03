@@ -296,6 +296,7 @@ TDA benefits:
 
 ## 4.2.4 Fusion Architecture
 
+![Model Architecture](assets/images/architecture.png)
 
 ---
 
