@@ -427,8 +427,9 @@ This justified the teacher-student architecture selection.
 Standard augmentations alone didn't guarantee rotation invariance.  
 Consistency Regularization was applied mathematically:
 
-f(x) ≈ f(rotate(x))
-
+$$
+f(x) \approx f(\text{rotate}(x))
+$$
 
 This:
 
