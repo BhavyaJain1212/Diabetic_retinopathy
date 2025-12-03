@@ -95,5 +95,224 @@ For DR detection, TDA offers:
 - Complementary Features: Topological features capture different information than spatial CNN features  
 - Robustness: Enhanced performance on small, imbalanced datasets via topological structure preservation  
 
+# 3. Dataset and Preprocessing
+
+## 3.1 APTOS 2019 Dataset
+
+The APTOS 2019 Blindness Detection dataset is a publicly available, clinically annotated fundus image dataset comprising:
+
+- **Sample Size:** 3,662 labeled images  
+- **Severity Classes:** 5 levels (0–4 per international DR grading standards)
+
+| Class | Count |
+|-------|--------|
+| Class 0 (No DR) | 1,805 images |
+| Class 1 (Mild DR) | 370 images |
+| Class 2 (Moderate DR) | 999 images |
+| Class 3 (Severe DR) | 193 images |
+| Class 4 (Proliferative DR) | 295 images |
+
+- **Annotation Quality:** Clinically reviewed via standard DR severity scale  
+- **Imbalance Ratio:** 9.7:1 (No DR to Proliferative DR), presenting significant class imbalance  
+
+---
+
+## 3.2 Data Preprocessing Pipeline
+
+### 3.2.1 Class Imbalance Mitigation
+
+**Stratified Splitting:**  
+To preserve class distribution across train/validation/test splits, we employed StratifiedShuffleSplit with 70/15/15 allocation. This ensures minority classes are adequately represented in all splits.
+
+**Weighted Random Sampling:**  
+Applied during training to enforce balanced mini-batch composition. For each class \( i \), the sampling weight is: w_i = N / n_i
+
+where:  
+- \( N \) = total training samples  
+- \( n_i \) = samples in class \( i \)
+
+This approach ensures the model observes minority classes as frequently as majority classes during training, preventing bias toward the No DR class.
+
+**Effective Number of Samples:**  
+To prevent overfitting on minority classes as dataset volume grows, we adopted the Effective Number of Samples principle: E(n_i) = (1 - β^(n_i)) / (1 - β)
+
+
+where:  
+- β is a hyperparameter  
+- \( n_i \) is the class sample count  
+
+This provides principled class weighting that diminishes information gain from redundant samples.
+
+---
+
+### 3.2.2 Data Augmentation
+
+**Geometric Transformations:**
+
+- RandomHorizontalFlip  
+- RandomVerticalFlip  
+- RandomRotation(±20°)
+
+**Photometric Transformations:**
+
+- ColorJitter (brightness=0.3, contrast=0.3, saturation=0.3)  
+
+**Input Standardization:**
+
+- Resize to **224×224**  
+- Normalize using ImageNet statistics  
+
+---
+
+## 3.3 Train/Validation/Test Splits
+
+| Split | Count | Class Distribution |
+|--------|--------|----------------------|
+| Training | 2,564 | Stratified |
+| Validation | 549 | Stratified |
+| Test | 549 | Stratified |
+
+---
+
+# 4. Methodology
+
+## 4.1 Architecture Exploration Phase
+
+### 4.1.1 Baseline Model Evaluation
+
+We systematically evaluated leading CNN architectures to identify efficient backbones:
+
+**EfficientNet-B0:**  
+- Baseline efficiency-focused model  
+- Architecture: Compound scaling  
+- Result: 81–83% accuracy (~1.9 GFLOPs)  
+
+**ResNet-50:**  
+- Strong on majority class  
+- Weak on rare classes  
+- Result: 72–83% accuracy  
+
+**ResNeXt-50:**  
+- Group convolutions  
+- Heavy undersampling caused low performance  
+- Result: 60–72% accuracy  
+
+**ConvNeXt (ModernNet):**  
+- Kernel sweep (k=3 → k=9)  
+- k=9 extracted larger lesions better  
+- Result: 76–80% accuracy  
+
+### 4.1.2 Efficiency-Accuracy Trade-off Analysis
+
+A key insight emerged: **Scale is not static**.  
+DR features vary significantly in size:
+
+- Microaneurysms: <10 pixels  
+- Hemorrhages: >100 pixels  
+
+Architectures with fixed receptive fields struggle.  
+EfficientNet models adapt well due to **compound scaling**.
+
+**Final Choice:**
+
+- **Teacher:** EfficientNet-B5  
+- **Student:** EfficientNet-B2  
+- Distillation bridges accuracy + efficiency  
+
+---
+
+## 4.2 Proposed Architecture: Knowledge Distillation Framework
+
+### 4.2.1 Knowledge Distillation Design
+
+**Teacher-Student Setup:**
+
+- Teacher → EfficientNet-B5  
+- Student → EfficientNet-B2  
+
+**Loss Function:**
+
+L_total = α * KL(T_s || S_s) + (1 - α) * CE(S, y)
+
+**Distillation Loss:**
+
+KL(softmax(T/τ), softmax(S/τ))
+
+
+Where:
+
+- τ = temperature  
+- α = interpolation hyperparameter  
+
+**Hyperparameters:**
+
+- Temperature: τ = 4  
+- Alpha schedule: 0.2 → 0.8 over epochs  
+- Optimizer: AdamW  
+- Scheduler: OneCycleLR  
+
+---
+
+## 4.2.2 Convolutional Block Attention Module (CBAM)
+
+CBAM refines feature maps using sequential:
+
+- **Channel Attention**  
+- **Spatial Attention**
+
+Equations:
+
+Channel Attention: M_c = σ(MLP(AvgPool(F)) + MLP(MaxPool(F)))
+Spatial Attention: M_s = σ(f7×7([AvgPool(F_c); MaxPool(F_c)]))
+Final Output: F' = M_s ⊗ M_c ⊗ F
+
+
+Advantages for DR detection:
+
+- Highlights lesion-rich areas  
+- Emphasizes discriminative channels  
+- Provides interpretable attention maps  
+- Lightweight overhead  
+
+---
+
+## 4.2.3 Topological Data Analysis (TDA) Branch
+
+Pipeline:
+
+1. Convert image to grayscale  
+2. Build cubical complex  
+3. Extract H0 and H1 persistence diagrams  
+4. Convert to **persistence image** (32×32)  
+5. Feed to 3-layer MLP (100 → 128 → 1024)
+
+TDA benefits:
+
+- Invariance to rotation/translation  
+- Captures lesion morphology  
+- Complements CNN spatial features  
+
+---
+
+## 4.2.4 Fusion Architecture
+
+
+---
+
+## 4.3 Training Protocol
+
+- Optimizer: AdamW (weight decay = 0.01)  
+- Scheduler: OneCycleLR (max_lr = 1e-3)  
+- Batch Size: 32  
+- Early Stopping: Patience = 15  
+- Label Smoothing: 0.1  
+- Dropout: 0.5  
+- Class Weighting: Effective Number of Samples  
+- Hardware:  
+  - Train: NVIDIA RTX 4060
+  - Inference: Intel i7/i5 CPUs  
+
+
+
 
 
