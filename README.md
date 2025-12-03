@@ -389,7 +389,7 @@ The confusion matrix highlights:
 - Moderate ↔ Severe misclassifications expected for adjacent DR grades  
 - Overall correct predictions: **625 / 733** (85%)
 
-![Model Architecture](assets/images/dr_architecture.png)
+![Confusion matrix](final_model/results/confusion_matrix.png)
 
 ---
 
